@@ -207,6 +207,7 @@ class REPLEnvironment:
         """
         Set up the llm_query function for the REPL environment.
         """
+        from .logging import get_logger
 
         def llm_query(prompt: str) -> str:
             """
@@ -221,17 +222,27 @@ class REPLEnvironment:
             Returns:
                 The sub-LLM's response as a string
             """
+            logger = get_logger()
 
             try:
                 if not self.config.sub_model:
                     return "Error: No sub-model configured"
+
+                # Log the query
+                logger.log_llm_query(prompt)
+
                 result = model_request_sync(
                     self.config.sub_model,
                     [ModelRequest.user_text_prompt(prompt)],
                 )
                 # Extract text from the response parts
                 text_parts = [part.content for part in result.parts if isinstance(part, TextPart)]
-                return "".join(text_parts) if text_parts else ""
+                response = "".join(text_parts) if text_parts else ""
+
+                # Log the response
+                logger.log_llm_response(response)
+
+                return response
             except Exception as e:
                 return f"Error querying sub-LLM: {e!s}"
 

@@ -6,6 +6,7 @@ from pydantic_ai import RunContext
 from pydantic_ai.toolsets import FunctionToolset
 
 from .dependencies import RLMConfig, RLMDependencies
+from .logging import get_logger
 from .repl import REPLEnvironment, REPLResult
 from .utils import format_repl_result
 
@@ -132,6 +133,10 @@ def create_rlm_toolset(
     @toolset.tool(description=EXECUTE_CODE_DESCRIPTION)
     async def execute_code(ctx: RunContext[RLMDependencies], code: str) -> str:
         repl_env = _get_or_create_repl(ctx)
+        logger = get_logger()
+
+        # Log the code being executed
+        logger.log_code_execution(code)
 
         try:
             loop = asyncio.get_running_loop()
@@ -139,6 +144,10 @@ def create_rlm_toolset(
                 loop.run_in_executor(None, repl_env.execute, code),
                 timeout=code_timeout,
             )
+
+            # Log the result
+            logger.log_result(result)
+
             return format_repl_result(result)
 
         except TimeoutError:

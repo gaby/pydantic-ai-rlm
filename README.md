@@ -29,9 +29,11 @@
 
 ## What is RLM?
 
-**RLM (Recursive Language Model)** is a pattern for handling contexts that exceed a model's context window. Instead of trying to fit everything into one prompt, the LLM writes Python code to programmatically explore and analyze the data.
+**RLM (Recursive Language Model)** is a pattern for handling contexts that exceed a model's context window, introduced by **Alex L. Zhang, Tim Kraska, and Omar Khattab** in their paper [Recursive Language Models](https://arxiv.org/abs/2512.24601). Instead of trying to fit everything into one prompt, the LLM writes Python code to programmatically explore and analyze the data.
 
 **The key insight:** An LLM can write code to search through millions of lines in seconds, then use `llm_query()` to delegate semantic analysis of relevant chunks to a sub-model.
+
+This library is an implementation inspired by the [original minimal implementation](https://github.com/alexzhang13/rlm-minimal).
 
 ---
 
@@ -226,6 +228,46 @@ deps = RLMDependencies(
 )
 ```
 
+### `configure_logging()`
+
+Enable verbose logging to see what the agent is doing in real-time.
+
+```python
+from pydantic_ai_rlm import configure_logging, run_rlm_analysis
+
+# Enable logging (uses rich if installed, falls back to plain text)
+configure_logging(enabled=True)
+
+# Now you'll see code executions and outputs in the terminal
+answer = await run_rlm_analysis(
+    context=massive_document,
+    query="Find the magic number",
+    model="openai:gpt-5",
+)
+
+# Disable logging when done
+configure_logging(enabled=False)
+```
+
+Install with rich logging support for syntax highlighting and styled output:
+```bash
+pip install pydantic-ai-rlm[logging]
+```
+
+Or install rich separately:
+```bash
+pip install rich
+```
+
+When enabled, you'll see:
+- Syntax-highlighted code being executed (with rich)
+- Execution results with status indicators (SUCCESS/ERROR)
+- Execution time for each code block
+- Variables created during execution
+- LLM sub-queries and responses (when using `llm_query()`)
+
+**Note:** Logging works without rich installed - it will use plain text output instead of styled panels
+
 ---
 
 ## REPL Environment
@@ -247,6 +289,8 @@ The sandboxed REPL provides:
 
 ## Related Projects
 
+- **[rlm](https://github.com/alexzhang13/rlm)** - Original RLM implementation by Alex L. Zhang, Tim Kraska, and Omar Khattab
+- **[rlm-minimal](https://github.com/alexzhang13/rlm-minimal)** - Minal RLM implementation by Alex L. Zhang
 - **[pydantic-ai](https://github.com/pydantic/pydantic-ai)** - The foundation: Agent framework by Pydantic
 - **[pydantic-deep](https://github.com/vstorm-co/pydantic-deepagents)** - Full deep agent framework with planning, filesystem, and more
 

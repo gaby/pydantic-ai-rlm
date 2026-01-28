@@ -1,5 +1,6 @@
 from .agent import create_rlm_agent, run_rlm_analysis, run_rlm_analysis_sync
 from .dependencies import ContextType, RLMConfig, RLMDependencies
+from .logging import configure_logging
 from .prompts import (
     LLM_QUERY_INSTRUCTIONS,
     RLM_INSTRUCTIONS,
@@ -21,6 +22,7 @@ __all__ = [
     "RLMDependencies",
     "build_rlm_instructions",
     "cleanup_repl_environments",
+    "configure_logging",
     "create_rlm_agent",
     "create_rlm_toolset",
     "run_rlm_analysis",
